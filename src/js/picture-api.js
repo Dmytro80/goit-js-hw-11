@@ -7,7 +7,7 @@ export default class PictureApiService {
   }
 
   getPictures() {
-    axios
+    return axios
       .get(`?q=${this.searchQuery}&page=${this.page}`, {
         params: {
           key: '29755041-61309e7f07fd00c6b0d56abc7',
@@ -20,8 +20,8 @@ export default class PictureApiService {
       .then(response => {
         this.incrementPage();
         this.totalPicture = response.data.total;
-        console.log(this.totalPicture);
-        console.log('После успешного запроса', response.data.hits);
+
+        return response.data.hits;
       });
   }
 
