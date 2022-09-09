@@ -1,4 +1,4 @@
-import axios from './js/axios';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import PictureApiService from './js/picture-api';
 
 const searchForm = document.querySelector('#search-form');
@@ -13,17 +13,38 @@ function onSearch(evt) {
   evt.preventDefault();
 
   pictureApiService.query = evt.currentTarget.elements.searchQuery.value;
-  pictureApiService.resetPage();
-  console.log(pictureApiService.getPictures());
 
-  pictureApiService.getPictures().then(response => {
-    const galleryMarkup = createListItemsGallery(response);
-    galleryContainer.insertAdjacentHTML('beforeend', galleryMarkup);
-  });
+  pictureApiService.resetPage();
+
+  clearGalleryContainer();
+
+  queryHandler();
 }
 
-function onLoadMore() {
-  pictureApiService.getPictures();
+async function queryHandler() {
+  try {
+    const responseData = await pictureApiService.getPictures();
+    if (responseData.length === 0) {
+      Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+    }
+
+    createGalleryMarkup(responseData);
+    Notify.success(`Hooray! We found ${pictureApiService.totalHits} images.`);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function onLoadMore() {
+  try {
+    const responseData = await pictureApiService.getPictures();
+
+    createGalleryMarkup(responseData);
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 function makeItemGallery({
@@ -64,4 +85,12 @@ function makeItemGallery({
 
 function createListItemsGallery(options) {
   return options.map(makeItemGallery).join('');
+}
+
+function createGalleryMarkup(response) {
+  const galleryMarkup = createListItemsGallery(response);
+  galleryContainer.insertAdjacentHTML('beforeend', galleryMarkup);
+}
+function clearGalleryContainer() {
+  galleryContainer.innerHTML = '';
 }
