@@ -4,6 +4,7 @@ import PictureApiService from './js/picture-api';
 const searchForm = document.querySelector('#search-form');
 const loadBtn = document.querySelector('.load-more');
 const galleryContainer = document.querySelector('.gallery');
+
 const pictureApiService = new PictureApiService();
 
 searchForm.addEventListener('submit', onSearch);
@@ -12,26 +13,30 @@ loadBtn.addEventListener('click', onLoadMore);
 function onSearch(evt) {
   evt.preventDefault();
 
+  isHiddenLoadBtn();
+
   pictureApiService.query = evt.currentTarget.elements.searchQuery.value;
 
   pictureApiService.resetPage();
 
   clearGalleryContainer();
 
-  queryHandler();
+  handleQuery();
 }
 
-async function queryHandler() {
+async function handleQuery() {
   try {
     const responseData = await pictureApiService.getPictures();
-    if (responseData.length === 0) {
-      Notify.failure(
-        'Sorry, there are no images matching your search query. Please try again.'
-      );
-    }
+
+    responseData.length === 0 ? throwFailureMessage() : throwSuccessMessage();
 
     createGalleryMarkup(responseData);
-    Notify.success(`Hooray! We found ${pictureApiService.totalHits} images.`);
+
+    if (pictureApiService.totalHits > 40) {
+      isVisibleLoadBtn();
+    }
+
+    pictureApiService.decrementTotal();
   } catch (error) {
     console.error(error);
   }
@@ -42,6 +47,13 @@ async function onLoadMore() {
     const responseData = await pictureApiService.getPictures();
 
     createGalleryMarkup(responseData);
+
+    pictureApiService.decrementTotal();
+
+    if (pictureApiService.totalHits < 40) {
+      isHiddenLoadBtn();
+      throwWarningMessage();
+    }
   } catch (error) {
     console.error(error);
   }
@@ -91,6 +103,29 @@ function createGalleryMarkup(response) {
   const galleryMarkup = createListItemsGallery(response);
   galleryContainer.insertAdjacentHTML('beforeend', galleryMarkup);
 }
+
 function clearGalleryContainer() {
   galleryContainer.innerHTML = '';
+}
+
+function isVisibleLoadBtn() {
+  loadBtn.classList.remove('is-hidden');
+}
+
+function isHiddenLoadBtn() {
+  loadBtn.classList.add('is-hidden');
+}
+
+function throwSuccessMessage() {
+  Notify.success(`Hooray! We found ${pictureApiService.totalHits} images.`);
+}
+
+function throwFailureMessage() {
+  Notify.failure(
+    'Sorry, there are no images matching your search query. Please try again.'
+  );
+}
+
+function throwWarningMessage() {
+  Notify.warning("We're sorry, but you've reached the end of search results.");
 }

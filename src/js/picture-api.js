@@ -22,7 +22,6 @@ export default class PictureApiService {
       );
       this.incrementPage();
       this.totalHits = response.data.totalHits;
-      console.log(this.totalHits);
 
       return response.data.hits;
     } catch (error) {
@@ -37,6 +36,10 @@ export default class PictureApiService {
 
   resetPage() {
     this.page = 1;
+  }
+
+  decrementTotal() {
+    this.totalHits -= 40;
   }
 
   get query() {

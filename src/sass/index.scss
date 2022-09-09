@@ -119,7 +119,7 @@ p {
   border-radius: 4px;
 
   transition: background 250ms var(--timing-function);
-
+  transition: opacity 250ms var(--timing-function);
   &:hover,
   &:focus {
     background: #188ce8;
