@@ -1,4 +1,8 @@
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
+
+import SimpleLightbox from 'simplelightbox';
+
+import 'simplelightbox/dist/simple-lightbox.min.css';
 import PictureApiService from './js/picture-api';
 
 const searchForm = document.querySelector('#search-form');
@@ -11,6 +15,7 @@ let counterHits = 0;
 
 searchForm.addEventListener('submit', onSearch);
 loadBtn.addEventListener('click', onLoadMore);
+galleryContainer.addEventListener('click', onGalleryContainerClick);
 
 function onSearch(evt) {
   evt.preventDefault();
@@ -130,4 +135,13 @@ function throwFailureMessage() {
 
 function throwWarningMessage() {
   Notify.warning("We're sorry, but you've reached the end of search results.");
+}
+
+function onGalleryContainerClick(evt) {
+  evt.preventDefault();
+  if (!evt.target.classList.contains('gallery__image')) {
+    return;
+  }
+  const lightbox = new SimpleLightbox('.gallery a');
+  lightbox.refresh();
 }
