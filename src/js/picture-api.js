@@ -3,7 +3,6 @@ export default class PictureApiService {
   constructor() {
     this.page = 1;
     this.searchQuery = '';
-    this.totalHits = 0;
   }
 
   async getPictures() {
@@ -21,9 +20,8 @@ export default class PictureApiService {
         }
       );
       this.incrementPage();
-      this.totalHits = response.data.totalHits;
 
-      return response.data.hits;
+      return response.data;
     } catch (error) {
       console.error(error);
       throw error;
@@ -36,10 +34,6 @@ export default class PictureApiService {
 
   resetPage() {
     this.page = 1;
-  }
-
-  decrementTotal() {
-    this.totalHits -= 40;
   }
 
   get query() {

@@ -7,6 +7,8 @@ const galleryContainer = document.querySelector('.gallery');
 
 const pictureApiService = new PictureApiService();
 
+let counterHits = 0;
+
 searchForm.addEventListener('submit', onSearch);
 loadBtn.addEventListener('click', onLoadMore);
 
@@ -26,17 +28,17 @@ function onSearch(evt) {
 
 async function handleQuery() {
   try {
-    const responseData = await pictureApiService.getPictures();
+    const { totalHits, hits } = await pictureApiService.getPictures();
 
-    responseData.length === 0 ? throwFailureMessage() : throwSuccessMessage();
+    counterHits = totalHits;
 
-    createGalleryMarkup(responseData);
+    hits.length === 0 ? throwFailureMessage() : throwSuccessMessage();
 
-    if (pictureApiService.totalHits > 40) {
+    createGalleryMarkup(hits);
+
+    if (counterHits > 40) {
       isVisibleLoadBtn();
     }
-
-    pictureApiService.decrementTotal();
   } catch (error) {
     console.error(error);
   }
@@ -44,13 +46,13 @@ async function handleQuery() {
 
 async function onLoadMore() {
   try {
-    const responseData = await pictureApiService.getPictures();
+    const { hits } = await pictureApiService.getPictures();
 
-    createGalleryMarkup(responseData);
+    createGalleryMarkup(hits);
 
-    pictureApiService.decrementTotal();
+    counterHits -= 40;
 
-    if (pictureApiService.totalHits < 40) {
+    if (counterHits <= 40) {
       isHiddenLoadBtn();
       throwWarningMessage();
     }
@@ -117,7 +119,7 @@ function isHiddenLoadBtn() {
 }
 
 function throwSuccessMessage() {
-  Notify.success(`Hooray! We found ${pictureApiService.totalHits} images.`);
+  Notify.success(`Hooray! We found ${counterHits} images.`);
 }
 
 function throwFailureMessage() {
